@@ -106,7 +106,7 @@ def generate_image_and_pdf(image_location, total_pins_requested, line_width=1):
 
     all_colors.sort()
 
-    result_text = f'{("# Pins"): <10}{"Color (rgb)": <20}\n'
+    result_text = f'{("# Total count"): <10}{"Color (rgb)": <20}\n'
 
     for color in PIN_COLORS:
         result_text += f'{all_colors.count(color): <10}{", ".join(map(str, color)): <20}\n'
@@ -114,7 +114,7 @@ def generate_image_and_pdf(image_location, total_pins_requested, line_width=1):
     if line_width > 0:
         add_grid_lines(demo_image, GRID_COLOR, block_size, line_width)
 
-    demo_image.save('Preview_with_Grid.png', 'PNG')
+    demo_image.save('output_image.png', 'PNG')
 
     pdf_output_path = 'Output_PDF.pdf'
     pdf_canvas = canvas.Canvas(pdf_output_path, pagesize=letter)
@@ -163,7 +163,7 @@ def generate_image_and_pdf(image_location, total_pins_requested, line_width=1):
                 pdf_canvas.drawString(left_margin - 20, row_y + 680, str(row_num))
 
     pdf_canvas.save()
-    return result_text, 'Preview_with_Grid.png', 'Output_PDF.pdf'
+    return result_text, 'output_image.png', 'Output_PDF.pdf'
 
 
 # Function to create a download link
@@ -181,7 +181,7 @@ st.title("Image Generator")
 image_location = st.file_uploader("Select Image", type=["png", "jpg", "jpeg", "gif"])
 
 if image_location:
-    total_pins_requested = st.number_input("Enter total pins", min_value=1, value=100, step=1)
+    total_pins_requested = st.number_input("Enter total number of sticky notes", min_value=1, value=100, step=1)
 
     if image_location and st.button("Generate Image and PDF"):
         result_text, preview_image_path, pdf_path = generate_image_and_pdf(image_location, total_pins_requested)
@@ -196,5 +196,5 @@ if image_location:
         pdf_download_link = create_download_link(pdf_path, "Download PDF")
         st.markdown(pdf_download_link, unsafe_allow_html=True)
 
-        image_download_link = create_download_link('Preview_with_Grid.png', "Download Output Image")
+        image_download_link = create_download_link('output_image.png', "Download Output Image")
         st.markdown(image_download_link, unsafe_allow_html=True)
