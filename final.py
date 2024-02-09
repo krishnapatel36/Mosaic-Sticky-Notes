@@ -1,10 +1,9 @@
 import base64
 from PIL import Image, ImageFont, ImageDraw
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
 import math
 import os
 import streamlit as st
+from fpdf import FPDF
 
 PROGRESS_WIDTH = 20
 
@@ -17,14 +16,12 @@ PIN_COLORS = [
     (255, 165, 164)   # Peach
 ]
 
-
 def calculate_grid_dimensions(source_width, source_height, block_size):
     rows = math.ceil(source_height / block_size)
     columns = math.ceil(source_width / block_size)
     return rows, columns
 
-
-def generate_image_and_pdf(image_location, total_pins_requested,line_width=1):
+def generate_image_and_pdf(image_location, total_pins_requested, line_width=1):
     font_size = 9
 
     if not image_location:
@@ -75,15 +72,6 @@ def generate_image_and_pdf(image_location, total_pins_requested,line_width=1):
                 except IndexError:
                     pass
 
-    def closest_pin_color(rgb):
-        r, g, b = rgb
-        color_diffs = []
-        for color in PIN_COLORS:
-            cr, cg, cb = color
-            color_diff = math.sqrt((r - cr)**2 + (g - cg)**2 + (b - cb)**2)
-            color_diffs.append((color_diff, color))
-        return min(color_diffs)[1]
-
     def closest_pin_color_weighted(rgb):
         r, g, b = rgb
         color_diffs = []
@@ -128,63 +116,25 @@ def generate_image_and_pdf(image_location, total_pins_requested,line_width=1):
     demo_image.save('Preview_with_Grid.png', 'PNG')
 
     pdf_output_path = 'Output_PDF.pdf'
-    pdf_canvas = canvas.Canvas(pdf_output_path, pagesize=letter)
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
 
-    boxes_per_page_horizontal = 12
-    boxes_per_page_vertical = 16
+    # Add image to PDF
+    pdf.image('Preview_with_Grid.png', x=10, y=10, w=190)
 
-    total_pages_horizontal = math.ceil(columns / boxes_per_page_horizontal)
-    total_pages_vertical = math.ceil(rows / boxes_per_page_vertical)
+    pdf_output_path = 'Output_PDF.pdf'
+    pdf.output(pdf_output_path)
 
-    for page_vertical in range(total_pages_vertical):
-        for page_horizontal in range(total_pages_horizontal):
-            start_y = page_vertical * boxes_per_page_vertical
-            start_x = page_horizontal * boxes_per_page_horizontal
-            end_y = min(start_y + boxes_per_page_vertical, rows)
-            end_x = min(start_x + boxes_per_page_horizontal, columns)
-
-            pdf_canvas.showPage()
-
-            # Add margins to the PDF by adjusting the coordinates
-            left_margin = 20
-            top_margin = 40
-            pdf_canvas.drawInlineImage(demo_image.crop((start_x * block_size, start_y * block_size,
-                                                        end_x * block_size, end_y * block_size)),
-                                       left_margin, top_margin,
-                                       width=letter[0] - left_margin * 2, height=letter[1] - top_margin * 2)
-
-            # Write column and row numbers to the top margin
-            pdf_canvas.setFont("Helvetica", 18)
-            col_letter = chr(ord('A') + (start_x // boxes_per_page_horizontal))
-            col_num = start_x % boxes_per_page_horizontal + 1
-            row_num = start_y // boxes_per_page_vertical + 1
-            page_label = f"{col_letter}{row_num}"
-            pdf_canvas.drawString(left_margin + 14, letter[1] - top_margin + 25, page_label)
-
-            # Write column and row numbers to the top margin
-            pdf_canvas.setFont("Helvetica", 18)
-            for col_num in range(start_x + 1, end_x + 1):
-                col_x = left_margin + (col_num - start_x - 1) * (letter[0] - left_margin * 2) / (end_x - start_x)
-                pdf_canvas.drawString(col_x + 14, letter[1] - top_margin + 5, str(col_num))
-
-            # Write row numbers to the bottom margin
-            pdf_canvas.setFont("Helvetica", 18)
-            for row_num in range(start_y + 1, end_y + 1):
-                row_y = top_margin - 5 - (row_num - start_y - 1) * (letter[1] - top_margin * 2) / (end_y - start_y)
-                pdf_canvas.drawString(left_margin - 20, row_y + 680, str(row_num))
-
-    pdf_canvas.save()
-    return result_text, 'Preview_with_Grid.png', 'Output_PDF.pdf'
-
+    return result_text, 'Preview_with_Grid.png', pdf_output_path
 
 # Function to create a download link
 def create_download_link(file_path, button_text):
     with open(file_path, "rb") as file:
         contents = file.read()
         encoded_file = base64.b64encode(contents).decode()
-        href = f'<a href="data:file/txt;base64,{encoded_file}" download="{file_path}">{button_text}</a>'
+        href = f'<a href="data:application/pdf;base64,{encoded_file}" download="{file_path}">{button_text}</a>'
     return href
-
 
 # Streamlit app starts here
 st.title("Image Generator")
@@ -202,3 +152,7 @@ if image_location:
 
         # Display preview image
         st.image(Image.open(preview_image_path).resize((300, 300)), caption='Preview Image', use_column_width=True)
+
+        # Create download link for PDF
+        pdf_download_link = create_download_link(pdf_path, "Download PDF")
+        st.markdown(pdf_download_link, unsafe_allow_html=True)
