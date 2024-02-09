@@ -37,7 +37,7 @@ def generate_image_and_pdf(image_location, total_pins_requested, line_width=1):
     demo_pixels = demo_image.load()
     number_image = Image.new('RGB', (source_width, source_height), color=(255, 255, 255))
     number_draw = ImageDraw.Draw(number_image)
-    number_font = ImageFont.truetype('arial.ttf', font_size)
+    number_font = ImageFont.load_default()
 
     GRID_COLOR = (128, 128, 128)
 
