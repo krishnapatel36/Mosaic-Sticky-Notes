@@ -1,5 +1,3 @@
-base64
-Pillow
-reportlab
-streamlit
-fpdf
+streamlit==0.99.0
+Pillow==8.4.0
+fpdf==1.7.2
