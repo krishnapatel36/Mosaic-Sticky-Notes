@@ -176,7 +176,7 @@ def create_download_link(file_path, button_text):
 
 
 # Streamlit app starts here
-st.title("Image Generator")
+st.title("Mosaic Generator Using Sticky Notes")
 
 image_location = st.file_uploader("Select Image", type=["png", "jpg", "jpeg", "gif"])
 
