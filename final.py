@@ -1,4 +1,3 @@
-
 import base64
 from PIL import Image, ImageFont, ImageDraw
 from reportlab.pdfgen import canvas
