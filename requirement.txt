@@ -2,3 +2,4 @@ base64
 Pillow
 reportlab
 streamlit
+fpdf
