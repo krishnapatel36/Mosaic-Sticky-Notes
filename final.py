@@ -5,7 +5,7 @@ from reportlab.lib.pagesizes import letter
 import math
 import os
 import streamlit as st
-
+st.set_page_config(page_title='Mosaic Art', page_icon=":bulb:")
 PROGRESS_WIDTH = 20
 
 PIN_COLORS = [
