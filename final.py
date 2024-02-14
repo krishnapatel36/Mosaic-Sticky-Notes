@@ -166,14 +166,12 @@ def generate_image_and_pdf(image_location, total_pins_requested, line_width=1):
     return result_text, 'output_image.png', 'Output_PDF.pdf'
 
 
-# Function to create a download link
 def create_download_link(file_path, button_text):
     with open(file_path, "rb") as file:
         contents = file.read()
         encoded_file = base64.b64encode(contents).decode()
-        href = f'<a href="data:file/txt;base64,{encoded_file}" download="{file_path}">{button_text}</a>'
+        href = f'<a href="data:application/pdf;base64,{encoded_file}" download="{file_path}">{button_text}</a>'
     return href
-
 
 # Streamlit app starts here
 st.title("Mosaic Generator Using Sticky Notes")
