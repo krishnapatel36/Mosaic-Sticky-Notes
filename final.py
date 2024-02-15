@@ -23,7 +23,7 @@ def calculate_grid_dimensions(source_width, source_height, block_size):
     columns = math.ceil(source_width / block_size)
     return rows, columns
 
-def generate_image_and_pdf(image_location, total_pins_requested, boxes_per_page_horizontal=12, line_width=1):
+def generate_image_and_pdf(image_location, total_pins_requested, line_width=1):
     font_size = 9
 
     if not image_location:
@@ -87,6 +87,8 @@ def generate_image_and_pdf(image_location, total_pins_requested, boxes_per_page_
     total_pin_count = 0
     all_colors = []
 
+    rows, columns = calculate_grid_dimensions(source_width, source_height, block_size)
+
     for source_y in range(0, source_height, block_size):
         for source_x in range(0, source_width, block_size):
             block_rgb = average_rgb_area(source_x, source_y)
@@ -99,11 +101,6 @@ def generate_image_and_pdf(image_location, total_pins_requested, boxes_per_page_
                              str(PIN_COLORS.index(block_pin_rgb)),
                              font=number_font,
                              fill=(0, 0, 0))
-
-    rows, columns = calculate_grid_dimensions(source_width, source_height, block_size)
-
-    # Calculate the new grid dimensions
-    rows = math.ceil(total_pins_requested / boxes_per_page_horizontal)
 
     all_colors.sort()
 
@@ -120,6 +117,7 @@ def generate_image_and_pdf(image_location, total_pins_requested, boxes_per_page_
     pdf_output_path = 'Output_PDF.pdf'
     pdf_canvas = canvas.Canvas(pdf_output_path, pagesize=letter)
 
+    boxes_per_page_horizontal = 12
     boxes_per_page_vertical = 16
 
     total_pages_horizontal = math.ceil(columns / boxes_per_page_horizontal)
@@ -179,7 +177,7 @@ st.title("Mosaic Generator Using Sticky Notes")
 image_location = st.file_uploader("Select Image", type=["png", "jpg", "jpeg", "gif"])
 
 if image_location:
-    total_pins_requested = st.number_input("Enter total number of sticky notes", min_value=1, value=100, step=1)
+    total_pins_requested = st.number_input("Enter approx total number of sticky notes", min_value=1, value=100, step=1)
 
     if image_location and st.button("Generate Image and PDF"):
         result_text, preview_image_path, pdf_path = generate_image_and_pdf(image_location, total_pins_requested)
