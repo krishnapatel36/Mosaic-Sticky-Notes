@@ -5,6 +5,7 @@ from reportlab.lib.pagesizes import letter
 import math
 import os
 import streamlit as st
+
 st.set_page_config(page_title='Mosaic Art', page_icon=":bulb:")
 PROGRESS_WIDTH = 20
 
@@ -22,7 +23,7 @@ def calculate_grid_dimensions(source_width, source_height, block_size):
     columns = math.ceil(source_width / block_size)
     return rows, columns
 
-def generate_image_and_pdf(image_location, total_pins_requested, line_width=1):
+def generate_image_and_pdf(image_location, total_pins_requested, boxes_per_page_horizontal=12, line_width=1):
     font_size = 9
 
     if not image_location:
@@ -103,24 +104,22 @@ def generate_image_and_pdf(image_location, total_pins_requested, line_width=1):
 
     # Calculate the new grid dimensions
     rows = math.ceil(total_pins_requested / boxes_per_page_horizontal)
-    
+
     all_colors.sort()
-    
+
     result_text = f'{("# Total count"): <10}{"Color (rgb)": <20}\n'
-    
+
     for color in PIN_COLORS:
         result_text += f'{all_colors.count(color): <10}{", ".join(map(str, color)): <20}\n'
-    
+
     if line_width > 0:
         add_grid_lines(demo_image, GRID_COLOR, block_size, line_width)
-    
-    demo_image.save('output_image.png', 'PNG')
 
+    demo_image.save('output_image.png', 'PNG')
 
     pdf_output_path = 'Output_PDF.pdf'
     pdf_canvas = canvas.Canvas(pdf_output_path, pagesize=letter)
 
-    boxes_per_page_horizontal = 12
     boxes_per_page_vertical = 16
 
     total_pages_horizontal = math.ceil(columns / boxes_per_page_horizontal)
